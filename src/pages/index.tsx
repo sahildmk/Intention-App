@@ -4,11 +4,14 @@ import { signIn, signOut, useSession } from "next-auth/react";
 
 import { api } from "@/utils/api";
 import { useState } from "react";
-// import Clock from "@/components/clock";
+import dynamic from "next/dynamic";
 
 const Home: NextPage = () => {
   const [intention, setIntention] = useState("What is your Intention?");
-  const now = new Date();
+
+  const Clock = dynamic(() => import("@/components/clock"), {
+    ssr: false,
+  });
 
   return (
     <>
@@ -18,18 +21,17 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className="font-Inter flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-[#252525] to-[#151515] font-light">
-        <div>{/* <Clock /> */}</div>
-        {/* <Clock initialTime={now.getTime()} /> */}
+        <Clock />
         <section>
           <div>
             <input
               type={"text"}
-              className="items-center justify-center rounded-lg bg-transparent text-2xl text-white transition-all after:h-full after:w-2 after:bg-white hover:bg-zinc-800 focus:outline-none md:text-4xl lg:text-6xl"
+              className="items-center justify-center rounded-lg bg-transparent text-4xl text-white transition-all after:h-full after:w-2 after:bg-white hover:bg-zinc-800 focus:outline-none md:text-5xl lg:text-7xl"
               value={intention}
               onChange={(e) => setIntention(e.target.value)}
             />
           </div>
-          <div className="text-xs font-extralight text-white md:text-sm lg:text-lg">
+          <div className="text-sm font-extralight text-zinc-300 md:text-sm lg:text-xl">
             9:45 pm - 10:45 pm
           </div>
         </section>
