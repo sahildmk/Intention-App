@@ -26,12 +26,12 @@ const Home: NextPage = () => {
           <div>
             <input
               type={"text"}
-              className="items-center justify-center rounded-lg bg-transparent text-4xl text-white transition-all after:h-full after:w-2 after:bg-white hover:bg-zinc-800 focus:outline-none md:text-5xl lg:text-7xl"
+              className="items-center justify-center rounded-lg bg-transparent px-5 text-4xl text-white transition-all after:h-full after:w-2 after:bg-white hover:bg-zinc-800 focus:outline-none md:text-5xl lg:text-7xl"
               value={intention}
               onChange={(e) => setIntention(e.target.value)}
             />
           </div>
-          <div className="text-sm font-extralight text-zinc-300 md:text-sm lg:text-xl">
+          <div className="px-5 text-sm font-extralight text-zinc-300 md:text-sm lg:text-xl">
             9:45 pm - 10:45 pm
           </div>
         </section>
