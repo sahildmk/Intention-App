@@ -9,7 +9,7 @@ export const collectionsRouter = createTRPCRouter({
   getCollectionItems: publicProcedure.query(async ({ ctx }) => {
     const collection = (await ctx.prisma.collection.findFirst({
       where: {
-        id: "1",
+        id: "clfs78n950000vosgtwna7gvl",
       },
       include: {
         collectionItems: true,
