@@ -3,15 +3,26 @@ import Head from "next/head";
 import { signIn, signOut, useSession } from "next-auth/react";
 
 import { api } from "@/utils/api";
-import { useState } from "react";
+import { type ChangeEvent, useState } from "react";
 import dynamic from "next/dynamic";
 
 const Home: NextPage = () => {
+  const collectionsQuery = api.collections.getCollectionItems.useQuery(
+    undefined,
+    {
+      refetchOnWindowFocus: false,
+    }
+  );
+
   const [intention, setIntention] = useState("What is your Intention?");
 
   const Clock = dynamic(() => import("@/components/clock"), {
     ssr: false,
   });
+
+  const setIntentionCallback = (e: ChangeEvent<HTMLInputElement>) => {
+    setIntention(e.target.value);
+  };
 
   return (
     <>
@@ -27,8 +38,8 @@ const Home: NextPage = () => {
             <input
               type={"text"}
               className="items-center justify-center rounded-lg bg-transparent px-5 text-4xl text-white transition-all after:h-full after:w-2 after:bg-white hover:bg-zinc-800 focus:outline-none md:text-5xl lg:text-7xl"
-              value={intention}
-              onChange={(e) => setIntention(e.target.value)}
+              value={collectionsQuery.data?.at(0)?.content ?? "...loading"}
+              onChange={setIntentionCallback}
             />
           </div>
           <div className="px-5 text-sm font-extralight text-zinc-300 md:text-sm lg:text-xl">
