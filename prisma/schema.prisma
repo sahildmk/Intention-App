@@ -27,6 +27,8 @@ model Collection {
   createdDateTime DateTime         @db.Timestamp()
   user            User?            @relation(fields: [userId], references: [id])
   collectionItems CollectionItem[]
+
+  @@index([userId])
 }
 
 model CollectionItem {
@@ -39,6 +41,9 @@ model CollectionItem {
   CreatedDateTime DateTime   @db.Timestamp()
   user            User?      @relation(fields: [userId], references: [id])
   collection      Collection @relation(fields: [collectionId], references: [id])
+
+  @@index([userId])
+  @@index([collectionId])
 }
 
 // Necessary for Next auth
@@ -58,6 +63,7 @@ model Account {
   user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
+  @@index([userId])
 }
 
 model Session {
@@ -66,6 +72,8 @@ model Session {
   userId       String
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 model User {

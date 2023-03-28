@@ -12,7 +12,11 @@ export const collectionsRouter = createTRPCRouter({
         id: "clfs78n950000vosgtwna7gvl",
       },
       include: {
-        collectionItems: true,
+        collectionItems: {
+          orderBy: {
+            StartDateTime: "asc",
+          },
+        },
       },
     })) as CollectionWithItems;
 
