@@ -17,6 +17,7 @@ const Home: NextPage = () => {
         console.log(data.at(0));
 
         setFirstColItem(data.at(0));
+        setIntention(data.at(0)?.content ?? "");
       },
     }
   );
@@ -46,14 +47,19 @@ const Home: NextPage = () => {
           <div>
             <input
               type={"text"}
-              className="items-center justify-center rounded-lg bg-transparent px-5 text-4xl text-white transition-all after:h-full after:w-2 after:bg-white hover:bg-zinc-800 focus:outline-none md:text-5xl lg:text-7xl"
-              value={firstColItem?.content ?? "...loading"}
+              className="items-center justify-center rounded-lg bg-transparent px-5 pb-2 text-4xl text-white transition-all after:h-full after:w-2 after:bg-white hover:bg-zinc-800 focus:outline-none md:text-5xl lg:text-7xl"
+              value={intention}
               onChange={setIntentionCallback}
             />
           </div>
-          <div className="px-5 text-sm font-extralight text-zinc-300 md:text-sm lg:text-xl">
-            {moment(firstColItem?.StartDateTime).format("h:mm a")} -{" "}
-            {moment(firstColItem?.EndDateTime).format("h:mm a")}
+          <div className="flex gap-1 px-3 text-sm font-extralight text-zinc-300 md:text-sm lg:text-xl">
+            <div className="rounded-md px-2 py-1 transition-all hover:cursor-pointer hover:bg-zinc-800">
+              {moment(firstColItem?.StartDateTime).format("h:mm a")}
+            </div>
+            <div className="py-1">-</div>
+            <div className="rounded-md px-2 py-1 transition-all hover:cursor-pointer hover:bg-zinc-800">
+              {moment(firstColItem?.EndDateTime).format("h:mm a")}
+            </div>
           </div>
         </section>
       </main>
