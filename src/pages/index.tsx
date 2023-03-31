@@ -3,15 +3,36 @@ import Head from "next/head";
 import { signIn, signOut, useSession } from "next-auth/react";
 
 import { api } from "@/utils/api";
-import { useState } from "react";
+import { type ChangeEvent, useState } from "react";
 import dynamic from "next/dynamic";
+import { CollectionItem } from "@prisma/client";
+import moment from "moment";
 
 const Home: NextPage = () => {
+  const collectionsQuery = api.collections.getCollectionItems.useQuery(
+    undefined,
+    {
+      refetchOnWindowFocus: false,
+      onSuccess(data) {
+        console.log(data.at(0));
+
+        setFirstColItem(data.at(0));
+        setIntention(data.at(0)?.content ?? "");
+      },
+    }
+  );
+
   const [intention, setIntention] = useState("What is your Intention?");
+
+  const [firstColItem, setFirstColItem] = useState<CollectionItem>();
 
   const Clock = dynamic(() => import("@/components/clock"), {
     ssr: false,
   });
+
+  const setIntentionCallback = (e: ChangeEvent<HTMLInputElement>) => {
+    setIntention(e.target.value);
+  };
 
   return (
     <>
@@ -26,13 +47,19 @@ const Home: NextPage = () => {
           <div>
             <input
               type={"text"}
-              className="items-center justify-center rounded-lg bg-transparent text-4xl text-white transition-all after:h-full after:w-2 after:bg-white hover:bg-zinc-800 focus:outline-none md:text-5xl lg:text-7xl"
+              className="items-center justify-center rounded-lg bg-transparent px-5 pb-2 text-4xl text-white transition-all after:h-full after:w-2 after:bg-white hover:bg-zinc-800 focus:outline-none md:text-5xl lg:text-7xl"
               value={intention}
-              onChange={(e) => setIntention(e.target.value)}
+              onChange={setIntentionCallback}
             />
           </div>
-          <div className="text-sm font-extralight text-zinc-300 md:text-sm lg:text-xl">
-            9:45 pm - 10:45 pm
+          <div className="flex gap-1 px-3 text-sm font-extralight text-zinc-300 md:text-sm lg:text-xl">
+            <div className="rounded-md px-2 py-1 transition-all hover:cursor-pointer hover:bg-zinc-800">
+              {moment(firstColItem?.StartDateTime).format("h:mm a")}
+            </div>
+            <div className="py-1">-</div>
+            <div className="rounded-md px-2 py-1 transition-all hover:cursor-pointer hover:bg-zinc-800">
+              {moment(firstColItem?.EndDateTime).format("h:mm a")}
+            </div>
           </div>
         </section>
       </main>
