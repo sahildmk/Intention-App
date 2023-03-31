@@ -1,9 +1,19 @@
 import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
-import { type Prisma } from "@prisma/client";
+import { CollectionItem, type Prisma } from "@prisma/client";
 
 type CollectionWithItems = Prisma.CollectionGetPayload<{
   include: { collectionItems: true };
 }>;
+
+export type CollectionItemDTO = {
+  id: string;
+  collectionId: string;
+  userId: string | null;
+  content: string;
+  startDateTime: string;
+  endDateTime: string;
+  createdDateTime: string;
+};
 
 export const collectionsRouter = createTRPCRouter({
   getCollectionItems: publicProcedure.query(async ({ ctx }) => {
@@ -20,6 +30,20 @@ export const collectionsRouter = createTRPCRouter({
       },
     })) as CollectionWithItems;
 
-    return collection.collectionItems;
+    const result: CollectionItemDTO[] = [];
+
+    collection.collectionItems.forEach((val) => {
+      result.push({
+        id: val.id,
+        collectionId: val.collectionId,
+        userId: val.userId,
+        content: val.content,
+        startDateTime: val.StartDateTime.toISOString(),
+        endDateTime: val.EndDateTime.toISOString(),
+        createdDateTime: val.CreatedDateTime.toISOString(),
+      });
+    });
+
+    return result;
   }),
 });

@@ -5,26 +5,66 @@ import { signIn, signOut, useSession } from "next-auth/react";
 import { api } from "@/utils/api";
 import { type ChangeEvent, useState } from "react";
 import dynamic from "next/dynamic";
-import { CollectionItem } from "@prisma/client";
 import moment from "moment";
 
-const Home: NextPage = () => {
-  const collectionsQuery = api.collections.getCollectionItems.useQuery(
-    undefined,
-    {
-      refetchOnWindowFocus: false,
-      onSuccess(data) {
-        console.log(data.at(0));
+import { type GetServerSideProps } from "next";
+import { appRouter } from "@/server/api/root";
+import { prisma } from "@/server/db";
+import { type CollectionItemDTO } from "@/server/api/routers/collections";
 
-        setFirstColItem(data.at(0));
-        setIntention(data.at(0)?.content ?? "");
-      },
-    }
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const caller = appRouter.createCaller({
+    session: null,
+    prisma: prisma,
+  });
+
+  const data = await caller.collections.getCollectionItems();
+
+  return {
+    props: {
+      collectionItems: data,
+    },
+  };
+};
+
+const Home: NextPage<{ collectionItems: CollectionItemDTO[] }> = ({
+  collectionItems,
+}) => {
+  // const collectionsQuery = api.collections.getCollectionItems.useQuery(
+  //   undefined,
+  //   {
+  //     refetchOnWindowFocus: false,
+  //     onSuccess(data) {
+  //       const current = data.at(0);
+
+  //       setIntention(current?.content ?? "");
+  //       setCurrentIntentionStartTime(moment(current?.StartDateTime));
+  //       setCurrentIntentionEndTime(moment(current?.EndDateTime));
+  //     },
+  //   }
+  // );
+
+  const firstItem = collectionItems.at(0);
+
+  const [intention, setIntention] = useState(firstItem?.content ?? "");
+
+  const currentMoment = moment();
+  const currentDate = currentMoment.format("YYYY-MM-DD");
+
+  const startOfCurrentTimeBlockString = `${currentDate}T${String(
+    currentMoment.hour()
+  ).padStart(2, "0")}:00:00`;
+
+  const [currentIntentionStartTime, setCurrentIntentionStartTime] = useState(
+    moment(firstItem?.startDateTime ?? startOfCurrentTimeBlockString)
   );
 
-  const [intention, setIntention] = useState("What is your Intention?");
-
-  const [firstColItem, setFirstColItem] = useState<CollectionItem>();
+  const [currentIntentionEndTime, setCurrentIntentionEndTime] = useState(
+    moment(firstItem?.endDateTime ?? startOfCurrentTimeBlockString).add(
+      1,
+      "hour"
+    )
+  );
 
   const Clock = dynamic(() => import("@/components/clock"), {
     ssr: false,
@@ -48,17 +88,17 @@ const Home: NextPage = () => {
             <input
               type={"text"}
               className="items-center justify-center rounded-lg bg-transparent px-5 pb-2 text-4xl text-white transition-all after:h-full after:w-2 after:bg-white hover:bg-zinc-800 focus:outline-none md:text-5xl lg:text-7xl"
-              value={intention}
+              value={intention === "" ? "Set current intention" : intention}
               onChange={setIntentionCallback}
             />
           </div>
-          <div className="flex gap-1 px-3 text-sm font-extralight text-zinc-300 md:text-sm lg:text-xl">
+          <div className="flex gap-1 px-2 text-sm font-extralight text-zinc-300 md:text-sm lg:text-xl">
             <div className="rounded-md px-2 py-1 transition-all hover:cursor-pointer hover:bg-zinc-800">
-              {moment(firstColItem?.StartDateTime).format("h:mm a")}
+              {currentIntentionStartTime.format("h:mm a")}
             </div>
             <div className="py-1">-</div>
             <div className="rounded-md px-2 py-1 transition-all hover:cursor-pointer hover:bg-zinc-800">
-              {moment(firstColItem?.EndDateTime).format("h:mm a")}
+              {currentIntentionEndTime.format("h:mm a")}
             </div>
           </div>
         </section>
