@@ -12,6 +12,9 @@ import { appRouter } from "@/server/api/root";
 import { prisma } from "@/server/db";
 import { type CollectionItemDTO } from "@/server/api/routers/collections";
 
+import Styles from "./index.module.css";
+import Script from "next/script";
+
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const caller = appRouter.createCaller({
     session: null,
@@ -70,7 +73,7 @@ const Home: NextPage<{ collectionItems: CollectionItemDTO[] }> = ({
     ssr: false,
   });
 
-  const setIntentionCallback = (e: ChangeEvent<HTMLInputElement>) => {
+  const setIntentionCallback = (e: ChangeEvent<HTMLTextAreaElement>) => {
     setIntention(e.target.value);
   };
 
@@ -81,18 +84,35 @@ const Home: NextPage<{ collectionItems: CollectionItemDTO[] }> = ({
         <meta name="description" content="The Intention App" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className="font-Inter flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-[#252525] to-[#151515] font-light">
+      <main className="font-Inter flex min-h-screen flex-col items-center justify-center overflow-hidden bg-[#131313] font-light">
+        <Script id="textarea_script">
+          {`const growers = document.querySelectorAll("#grow-wrap-id");
+
+growers.forEach((grower) => {
+  const textarea = grower.querySelector("textarea");
+  textarea?.addEventListener("input", () => {
+    grower.dataset.replicatedValue = textarea.value;
+  });
+});`}
+        </Script>
         <Clock />
         <section>
           <div>
-            <input
+            {/* <input
               type={"text"}
               className="items-center justify-center rounded-lg bg-transparent px-5 pb-2 text-4xl text-white transition-all after:h-full after:w-2 after:bg-white hover:bg-zinc-800 focus:outline-none md:text-5xl lg:text-7xl"
               value={intention === "" ? "Set current intention" : intention}
               onChange={setIntentionCallback}
-            />
+            /> */}
+            <div id="grow-wrap-id" className={Styles["grow-wrap"]}>
+              <textarea
+                className={Styles["text-styling"]}
+                value={intention === "" ? "Set current intention" : intention}
+                onChange={setIntentionCallback}
+              />
+            </div>
           </div>
-          <div className="flex gap-1 px-2 text-sm font-extralight text-zinc-300 md:text-sm lg:text-xl">
+          <div className="mt-2 flex gap-1 text-sm font-extralight text-zinc-300 md:text-sm lg:text-xl">
             <div className="rounded-md px-2 py-1 transition-all hover:cursor-pointer hover:bg-zinc-800">
               {currentIntentionStartTime.format("h:mm a")}
             </div>
