@@ -8,12 +8,12 @@ import dynamic from "next/dynamic";
 import moment from "moment";
 
 import { type GetServerSideProps } from "next";
-import { appRouter } from "@/server/api/root";
-import { prisma } from "@/server/db";
 import { type CollectionItemDTO } from "@/server/api/routers/collections";
 
 import Styles from "./index.module.css";
 import Script from "next/script";
+import { appRouter } from "@/server/api/root";
+import { prisma } from "@/server/db";
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const caller = appRouter.createCaller({
@@ -33,20 +33,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 const Home: NextPage<{ collectionItems: CollectionItemDTO[] }> = ({
   collectionItems,
 }) => {
-  // const collectionsQuery = api.collections.getCollectionItems.useQuery(
-  //   undefined,
-  //   {
-  //     refetchOnWindowFocus: false,
-  //     onSuccess(data) {
-  //       const current = data.at(0);
-
-  //       setIntention(current?.content ?? "");
-  //       setCurrentIntentionStartTime(moment(current?.StartDateTime));
-  //       setCurrentIntentionEndTime(moment(current?.EndDateTime));
-  //     },
-  //   }
-  // );
-
   const firstItem = collectionItems.at(0);
 
   const [intention, setIntention] = useState(firstItem?.content ?? "");
