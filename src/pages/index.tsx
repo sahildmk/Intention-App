@@ -1,22 +1,18 @@
 import { type NextPage } from "next";
 import Head from "next/head";
 import { signIn, signOut, useSession } from "next-auth/react";
-
 import { api } from "@/utils/api";
-import { type ChangeEvent, useState } from "react";
+import { type ChangeEvent, useState, useEffect, useCallback } from "react";
 import dynamic from "next/dynamic";
 import moment from "moment";
-
 import { type GetServerSideProps } from "next";
 import { type CollectionItemDto } from "@/server/api/routers/collections";
-
 import Styles from "./index.module.css";
 import Script from "next/script";
 import { appRouter } from "@/server/api/root";
 import { prisma } from "@/server/db";
-import { useQuery } from "@tanstack/react-query";
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
+export const getServerSideProps: GetServerSideProps = async () => {
   const caller = appRouter.createCaller({
     session: null,
     prisma: prisma,
@@ -37,6 +33,7 @@ const Home: NextPage<{ collectionItems: CollectionItemDto[] }> = ({
   const firstItem = collectionItems.at(0);
 
   const [intention, setIntention] = useState(firstItem?.content ?? "");
+  const [intentionUpdated, setIntentionUpdated] = useState(false);
 
   const currentMoment = moment();
   const currentDate = currentMoment.format("YYYY-MM-DD");
@@ -61,18 +58,29 @@ const Home: NextPage<{ collectionItems: CollectionItemDto[] }> = ({
   });
 
   const setIntentionCallback = (e: ChangeEvent<HTMLTextAreaElement>) => {
+    setIntentionUpdated(true);
     setIntention(e.target.value);
   };
 
   const updateIntentionMut = api.collections.updateCollectionItem.useMutation();
 
-  const updateIntentionCallback = () => {
-    if (firstItem?.id)
+  const updateIntentionCallback = useCallback(() => {
+    if (firstItem?.id && intentionUpdated)
       updateIntentionMut.mutate({
         collectionItemId: firstItem?.id,
         content: intention,
       });
-  };
+  }, [firstItem?.id, intention, updateIntentionMut, intentionUpdated]);
+
+  useEffect(() => {
+    const timeout = setTimeout(updateIntentionCallback, 2000);
+
+    return () => {
+      clearTimeout(timeout);
+      setIntentionUpdated(false);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [intention]);
 
   return (
     <>
@@ -98,7 +106,7 @@ growers.forEach((grower) => {
             <div id="grow-wrap-id" className={Styles["grow-wrap"]}>
               <textarea
                 className={Styles["text-styling"]}
-                value={intention === "" ? "Set current intention" : intention}
+                value={intention}
                 onChange={setIntentionCallback}
               />
             </div>
@@ -112,7 +120,6 @@ growers.forEach((grower) => {
               {currentIntentionEndTime.format("h:mm a")}
             </div>
           </div>
-          <button onClick={updateIntentionCallback}>save</button>
         </section>
       </main>
     </>
