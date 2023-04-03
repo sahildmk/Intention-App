@@ -70,7 +70,7 @@ const Home: NextPage<{ collectionItems: CollectionItemDTO[] }> = ({
         <meta name="description" content="The Intention App" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className="font-Inter flex min-h-screen flex-col items-center justify-center overflow-hidden bg-[#131313] font-light">
+      <main className="font-Inter flex min-h-screen flex-col items-center justify-center overflow-hidden bg-zinc-100 font-light dark:bg-[#131313]">
         <Script id="textarea_script">
           {`const growers = document.querySelectorAll("#grow-wrap-id");
 
@@ -98,12 +98,12 @@ growers.forEach((grower) => {
               />
             </div>
           </div>
-          <div className="mt-2 flex gap-1 text-sm font-extralight text-zinc-300 md:text-sm lg:text-xl">
-            <div className="rounded-md px-2 py-1 transition-all hover:cursor-pointer hover:bg-zinc-800">
+          <div className="mt-2 flex gap-1 text-sm font-extralight text-zinc-700 dark:text-zinc-300 md:text-sm lg:text-xl">
+            <div className="rounded-md px-2 py-1 transition-all hover:cursor-pointer hover:bg-zinc-300 dark:hover:bg-zinc-800">
               {currentIntentionStartTime.format("h:mm a")}
             </div>
             <div className="py-1">-</div>
-            <div className="rounded-md px-2 py-1 transition-all hover:cursor-pointer hover:bg-zinc-800">
+            <div className="rounded-md px-2 py-1 transition-all hover:cursor-pointer hover:bg-zinc-300 dark:hover:bg-zinc-800">
               {currentIntentionEndTime.format("h:mm a")}
             </div>
           </div>
