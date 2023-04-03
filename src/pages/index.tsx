@@ -8,12 +8,13 @@ import dynamic from "next/dynamic";
 import moment from "moment";
 
 import { type GetServerSideProps } from "next";
-import { type CollectionItemDTO } from "@/server/api/routers/collections";
+import { type CollectionItemDto } from "@/server/api/routers/collections";
 
 import Styles from "./index.module.css";
 import Script from "next/script";
 import { appRouter } from "@/server/api/root";
 import { prisma } from "@/server/db";
+import { useQuery } from "@tanstack/react-query";
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const caller = appRouter.createCaller({
@@ -30,7 +31,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   };
 };
 
-const Home: NextPage<{ collectionItems: CollectionItemDTO[] }> = ({
+const Home: NextPage<{ collectionItems: CollectionItemDto[] }> = ({
   collectionItems,
 }) => {
   const firstItem = collectionItems.at(0);
@@ -63,6 +64,16 @@ const Home: NextPage<{ collectionItems: CollectionItemDTO[] }> = ({
     setIntention(e.target.value);
   };
 
+  const updateIntentionMut = api.collections.updateCollectionItem.useMutation();
+
+  const updateIntentionCallback = () => {
+    if (firstItem?.id)
+      updateIntentionMut.mutate({
+        collectionItemId: firstItem?.id,
+        content: intention,
+      });
+  };
+
   return (
     <>
       <Head>
@@ -84,12 +95,6 @@ growers.forEach((grower) => {
         <Clock />
         <section>
           <div>
-            {/* <input
-              type={"text"}
-              className="items-center justify-center rounded-lg bg-transparent px-5 pb-2 text-4xl text-white transition-all after:h-full after:w-2 after:bg-white hover:bg-zinc-800 focus:outline-none md:text-5xl lg:text-7xl"
-              value={intention === "" ? "Set current intention" : intention}
-              onChange={setIntentionCallback}
-            /> */}
             <div id="grow-wrap-id" className={Styles["grow-wrap"]}>
               <textarea
                 className={Styles["text-styling"]}
@@ -107,6 +112,7 @@ growers.forEach((grower) => {
               {currentIntentionEndTime.format("h:mm a")}
             </div>
           </div>
+          <button onClick={updateIntentionCallback}>save</button>
         </section>
       </main>
     </>

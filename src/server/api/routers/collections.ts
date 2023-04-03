@@ -1,11 +1,12 @@
 import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
 import { CollectionItem, type Prisma } from "@prisma/client";
+import { z } from "zod";
 
 type CollectionWithItems = Prisma.CollectionGetPayload<{
   include: { collectionItems: true };
 }>;
 
-export type CollectionItemDTO = {
+export type CollectionItemDto = {
   id: string;
   collectionId: string;
   userId: string | null;
@@ -30,20 +31,41 @@ export const collectionsRouter = createTRPCRouter({
       },
     })) as CollectionWithItems;
 
-    const result: CollectionItemDTO[] = [];
+    const result: CollectionItemDto[] = [];
 
-    collection.collectionItems.forEach((val) => {
-      result.push({
-        id: val.id,
-        collectionId: val.collectionId,
-        userId: val.userId,
-        content: val.content,
-        startDateTime: val.StartDateTime.toISOString(),
-        endDateTime: val.EndDateTime.toISOString(),
-        createdDateTime: val.CreatedDateTime.toISOString(),
-      });
+    collection.collectionItems.forEach((collectionItem) => {
+      result.push(CollectionItemToDto(collectionItem));
     });
 
     return result;
   }),
+
+  updateCollectionItem: publicProcedure
+    .input(z.object({ collectionItemId: z.string(), content: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      console.log(input.collectionItemId, input.content);
+
+      const result = await ctx.prisma.collectionItem.update({
+        data: {
+          content: input.content,
+        },
+        where: {
+          id: input.collectionItemId,
+        },
+      });
+
+      return CollectionItemToDto(result);
+    }),
 });
+
+function CollectionItemToDto(collectionItem: CollectionItem) {
+  return {
+    id: collectionItem.id,
+    collectionId: collectionItem.collectionId,
+    userId: collectionItem.userId,
+    content: collectionItem.content,
+    startDateTime: collectionItem.StartDateTime.toISOString(),
+    endDateTime: collectionItem.EndDateTime.toISOString(),
+    createdDateTime: collectionItem.CreatedDateTime.toISOString(),
+  } satisfies CollectionItemDto;
+}
