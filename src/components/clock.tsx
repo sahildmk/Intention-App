@@ -12,7 +12,7 @@ export default function Clock() {
   }, []);
 
   return (
-    <div className="absolute top-0 left-0 pt-10 pl-10 text-2xl text-zinc-400 md:text-4xl lg:text-4xl">
+    <div className="absolute top-0 left-0 pt-10 pl-10 text-2xl text-zinc-700 dark:text-zinc-400 md:text-4xl lg:text-4xl">
       {time.toLocaleTimeString("en-AU", {
         hour: "numeric",
         minute: "2-digit",
