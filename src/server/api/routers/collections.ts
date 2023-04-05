@@ -1,4 +1,8 @@
-import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
+import {
+  createTRPCRouter,
+  protectedProcedure,
+  publicProcedure,
+} from "@/server/api/trpc";
 import { CollectionItem, type Prisma } from "@prisma/client";
 import { z } from "zod";
 
@@ -17,7 +21,7 @@ export type CollectionItemDto = {
 };
 
 export const collectionsRouter = createTRPCRouter({
-  getCollectionItems: publicProcedure.query(async ({ ctx }) => {
+  getCollectionItems: protectedProcedure.query(async ({ ctx }) => {
     const collection = (await ctx.prisma.collection.findFirst({
       where: {
         id: "clfs78n950000vosgtwna7gvl",
@@ -40,7 +44,7 @@ export const collectionsRouter = createTRPCRouter({
     return result;
   }),
 
-  updateCollectionItem: publicProcedure
+  updateCollectionItem: protectedProcedure
     .input(z.object({ collectionItemId: z.string(), content: z.string() }))
     .mutation(async ({ ctx, input }) => {
       console.log(input.collectionItemId, input.content);
