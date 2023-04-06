@@ -114,23 +114,24 @@ const Home: NextPage<{ collectionItems: CollectionItemDto[] }> = ({
         {sessionData && (
           <section>
             <Script id="textarea_script">
-              {`const growers = document.querySelectorAll("#grow-wrap-id");
-    
-    growers.forEach((grower) => {
-      const textarea = grower.querySelector("textarea");
-      textarea?.addEventListener("input", () => {
-        grower.dataset.replicatedValue = textarea.value;
-      });
-    });`}
+              {`const grower = document.getElementById("grow-wrap-id");
+                const textarea = grower.querySelector("textarea");
+                
+                grower.dataset.replicatedValue = textarea.value;
+                
+                textarea?.addEventListener("input", () => {
+                  grower.dataset.replicatedValue = textarea.value;
+                });`}
             </Script>
             <Clock />
-            <section>
+            <section className="px-5 sm:px-10">
               <div>
                 <div id="grow-wrap-id" className={Styles["grow-wrap"]}>
                   <textarea
                     className={Styles["text-styling"]}
                     value={intention}
                     onChange={setIntentionCallback}
+                    rows={1}
                   />
                 </div>
               </div>
@@ -148,7 +149,7 @@ const Home: NextPage<{ collectionItems: CollectionItemDto[] }> = ({
         )}
         <div className="absolute top-0 right-0 mt-10 mr-10 text-sm">
           <button
-            className="flex items-center justify-center gap-1 rounded-md border border-zinc-700 bg-zinc-900 p-2 text-zinc-700 transition-all hover:bg-zinc-700 dark:text-zinc-400"
+            className="flex items-center justify-center gap-1 rounded-md border p-2 text-zinc-700 transition-all hover:bg-zinc-700 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400"
             onClick={() => void signOut()}
           >
             <ArrowLeftOnRectangleIcon className="h-5 w-5 text-zinc-700 dark:text-zinc-400" />

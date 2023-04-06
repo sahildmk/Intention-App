@@ -27,11 +27,10 @@
 }
 
 .text-styling {
-  @apply items-center justify-center rounded-lg bg-transparent bg-zinc-200 px-3 py-3 text-4xl text-zinc-600 dark:bg-neutral-900 dark:text-white;
-  @apply transition-all after:h-full after:w-2 after:bg-white hover:bg-zinc-300 focus:outline-none dark:hover:bg-neutral-800 md:text-5xl lg:w-[48rem] lg:text-6xl lg:leading-snug;
+  @apply items-center justify-center rounded-lg bg-transparent bg-zinc-200 px-8 py-4 text-4xl text-zinc-600 dark:bg-neutral-900 dark:text-white;
+  @apply transition-all after:h-full after:w-2 after:bg-white hover:bg-zinc-300 focus:outline-none dark:hover:bg-neutral-800 md:text-5xl lg:w-[48rem] lg:text-5xl lg:leading-snug;
 }
 
 .grow-wrap::after {
   @apply text-styling;
-  @apply max-w-xs lg:max-w-3xl;
 }
