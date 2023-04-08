@@ -6,7 +6,7 @@ import { type ChangeEvent, useState, useEffect, useCallback } from "react";
 import dynamic from "next/dynamic";
 import moment from "moment";
 import { type GetServerSideProps } from "next";
-import { type CollectionItemDto } from "@/server/api/routers/collections";
+import { type CollectionItemDto } from "@/server/api/routers/collections/collectionsRouter";
 import Styles from "./index.module.css";
 import Script from "next/script";
 import { appRouter } from "@/server/api/root";
@@ -38,6 +38,10 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
     },
   };
 };
+
+const Clock = dynamic(() => import("@/components/clock"), {
+  ssr: false,
+});
 
 const Home: NextPage<{ collectionItems: CollectionItemDto[] }> = ({
   collectionItems,
@@ -79,10 +83,6 @@ const Home: NextPage<{ collectionItems: CollectionItemDto[] }> = ({
     )
   );
 
-  const Clock = dynamic(() => import("@/components/clock"), {
-    ssr: false,
-  });
-
   const setIntentionCallback = (e: ChangeEvent<HTMLTextAreaElement>) => {
     setIntentionUpdated(true);
     setIntention(e.target.value);
@@ -117,7 +117,7 @@ const Home: NextPage<{ collectionItems: CollectionItemDto[] }> = ({
       </Head>
       <main className="font-Inter flex min-h-screen flex-col items-center justify-center overflow-hidden bg-zinc-100 font-light dark:bg-[#131313] dark:text-zinc-300">
         {sessionData ? (
-          <section>
+          <section className="flex w-full justify-center">
             <Script id="textarea_script">
               {`const grower = document.getElementById("grow-wrap-id");
                 const textarea = grower.querySelector("textarea");
@@ -129,7 +129,7 @@ const Home: NextPage<{ collectionItems: CollectionItemDto[] }> = ({
                 });`}
             </Script>
             <Clock />
-            <section className="px-5 sm:px-10">
+            <section className="w-full px-5 sm:px-10 md:w-fit">
               <div>
                 <div id="grow-wrap-id" className={Styles["grow-wrap"]}>
                   <textarea
@@ -137,11 +137,11 @@ const Home: NextPage<{ collectionItems: CollectionItemDto[] }> = ({
                     value={intention}
                     onChange={setIntentionCallback}
                     rows={1}
-                    placeholder="What is your intention?"
+                    placeholder="Set your intention"
                   />
                 </div>
               </div>
-              <div className="mt-2 flex gap-1 text-sm font-extralight text-zinc-700 dark:text-zinc-300 md:text-sm lg:text-xl">
+              <div className="text-md mt-2 flex gap-1 font-extralight text-zinc-700 dark:text-zinc-300 md:text-xl">
                 <div className="rounded-md px-2 py-1 transition-all hover:cursor-pointer hover:bg-zinc-300 dark:hover:bg-zinc-800">
                   {currentIntentionStartTime.format("h:mm a")}
                 </div>

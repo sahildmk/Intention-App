@@ -1,4 +1,5 @@
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
+import * as CollectionsRepository from "@/server/repository/collectionsRepository";
 import { ProcessRequestAsync } from "@/utils/processRequest";
 import { type CollectionItem } from "@prisma/client";
 import { z } from "zod";
@@ -16,14 +17,8 @@ export type CollectionItemDto = {
 export const collectionsRouter = createTRPCRouter({
   getCollectionItems: protectedProcedure.query(async ({ ctx }) => {
     return await ProcessRequestAsync(async () => {
-      const collectionItems = await ctx.prisma.collectionItem.findMany({
-        where: {
-          userId: ctx.session?.user?.id,
-        },
-        orderBy: {
-          StartDateTime: "asc",
-        },
-      });
+      const collectionItems =
+        await CollectionsRepository.GetAllCollectionItemsByUserId(ctx);
 
       const result: CollectionItemDto[] = [];
 
@@ -38,16 +33,15 @@ export const collectionsRouter = createTRPCRouter({
   updateCollectionItem: protectedProcedure
     .input(z.object({ collectionItemId: z.string(), content: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      const result = await ctx.prisma.collectionItem.update({
-        data: {
-          content: input.content,
-        },
-        where: {
-          id: input.collectionItemId,
-        },
-      });
+      return await ProcessRequestAsync(async () => {
+        const result = await CollectionsRepository.UpdateCollectionItemContent(
+          ctx,
+          input.collectionItemId,
+          input.content
+        );
 
-      return CollectionItemToDto(result);
+        return CollectionItemToDto(result);
+      });
     }),
 });
 
