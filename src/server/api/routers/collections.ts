@@ -1,15 +1,7 @@
-import {
-  createTRPCRouter,
-  protectedProcedure,
-  publicProcedure,
-} from "@/server/api/trpc";
-import { ProcessRequest, ProcessRequestAsync } from "@/utils/processRequest";
-import { type CollectionItem, type Prisma } from "@prisma/client";
+import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
+import { ProcessRequestAsync } from "@/utils/processRequest";
+import { type CollectionItem } from "@prisma/client";
 import { z } from "zod";
-
-type CollectionWithItems = Prisma.CollectionGetPayload<{
-  include: { collectionItems: true };
-}>;
 
 export type CollectionItemDto = {
   id: string;

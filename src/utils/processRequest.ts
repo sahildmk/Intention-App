@@ -1,6 +1,3 @@
-import { TRPCError } from "@trpc/server";
-import { Session } from "next-auth";
-
 export type Result<T> =
   | {
       ok: true;
