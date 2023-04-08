@@ -3,7 +3,8 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "@/server/api/trpc";
-import { CollectionItem, type Prisma } from "@prisma/client";
+import { ProcessRequest, ProcessRequestAsync } from "@/utils/processRequest";
+import { type CollectionItem, type Prisma } from "@prisma/client";
 import { z } from "zod";
 
 type CollectionWithItems = Prisma.CollectionGetPayload<{
@@ -22,33 +23,29 @@ export type CollectionItemDto = {
 
 export const collectionsRouter = createTRPCRouter({
   getCollectionItems: protectedProcedure.query(async ({ ctx }) => {
-    const collection = (await ctx.prisma.collection.findFirst({
-      where: {
-        id: "clfs78n950000vosgtwna7gvl",
-      },
-      include: {
-        collectionItems: {
-          orderBy: {
-            StartDateTime: "asc",
-          },
+    return await ProcessRequestAsync(async () => {
+      const collectionItems = await ctx.prisma.collectionItem.findMany({
+        where: {
+          userId: ctx.session?.user?.id,
         },
-      },
-    })) as CollectionWithItems;
+        orderBy: {
+          StartDateTime: "asc",
+        },
+      });
 
-    const result: CollectionItemDto[] = [];
+      const result: CollectionItemDto[] = [];
 
-    collection.collectionItems.forEach((collectionItem) => {
-      result.push(CollectionItemToDto(collectionItem));
+      collectionItems.forEach((collectionItem) => {
+        result.push(CollectionItemToDto(collectionItem));
+      });
+
+      return result;
     });
-
-    return result;
   }),
 
   updateCollectionItem: protectedProcedure
     .input(z.object({ collectionItemId: z.string(), content: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      console.log(input.collectionItemId, input.content);
-
       const result = await ctx.prisma.collectionItem.update({
         data: {
           content: input.content,
