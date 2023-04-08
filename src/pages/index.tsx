@@ -14,6 +14,7 @@ import { prisma } from "@/server/db";
 import { useRouter } from "next/router";
 import { TRPCError } from "@trpc/server";
 import { ArrowLeftOnRectangleIcon } from "@heroicons/react/24/solid";
+import LoadingSpinner from "@/components/loadingSpinner";
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const caller = appRouter.createCaller({
@@ -24,9 +25,11 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
   let data: CollectionItemDto[] = [];
 
   try {
-    data = await caller.collections.getCollectionItems();
+    const result = await caller.collections.getCollectionItems();
+    if (result.ok) data = result.value;
   } catch (error) {
-    if (error instanceof TRPCError) console.log("TRPC ERROR");
+    if (error instanceof TRPCError && error.code === "UNAUTHORIZED")
+      console.log("Unauthorized. Logging out...");
   }
 
   return {
@@ -43,6 +46,8 @@ const Home: NextPage<{ collectionItems: CollectionItemDto[] }> = ({
   const router = useRouter();
 
   const [calledPush, setCalledPush] = useState(false);
+
+  const [loadingLogout, setLoadingLogout] = useState(false);
 
   useEffect(() => {
     if (sessionStatus === "unauthenticated" && !sessionData && !calledPush) {
@@ -111,7 +116,7 @@ const Home: NextPage<{ collectionItems: CollectionItemDto[] }> = ({
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className="font-Inter flex min-h-screen flex-col items-center justify-center overflow-hidden bg-zinc-100 font-light dark:bg-[#131313] dark:text-zinc-300">
-        {sessionData && (
+        {sessionData ? (
           <section>
             <Script id="textarea_script">
               {`const grower = document.getElementById("grow-wrap-id");
@@ -132,6 +137,7 @@ const Home: NextPage<{ collectionItems: CollectionItemDto[] }> = ({
                     value={intention}
                     onChange={setIntentionCallback}
                     rows={1}
+                    placeholder="What is your intention?"
                   />
                 </div>
               </div>
@@ -145,17 +151,28 @@ const Home: NextPage<{ collectionItems: CollectionItemDto[] }> = ({
                 </div>
               </div>
             </section>
+            <div className="absolute top-0 right-0 mt-10 mr-10 text-sm">
+              <button
+                className="flex items-center justify-center gap-1 rounded-md border p-2 text-zinc-700 transition-all hover:bg-zinc-700 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400"
+                onClick={() => {
+                  setLoadingLogout(true);
+                  void signOut();
+                }}
+              >
+                {loadingLogout ? (
+                  <LoadingSpinner />
+                ) : (
+                  <>
+                    <ArrowLeftOnRectangleIcon className="h-5 w-5 text-zinc-700 dark:text-zinc-400" />
+                    Sign out
+                  </>
+                )}
+              </button>
+            </div>
           </section>
+        ) : (
+          <LoadingSpinner />
         )}
-        <div className="absolute top-0 right-0 mt-10 mr-10 text-sm">
-          <button
-            className="flex items-center justify-center gap-1 rounded-md border p-2 text-zinc-700 transition-all hover:bg-zinc-700 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400"
-            onClick={() => void signOut()}
-          >
-            <ArrowLeftOnRectangleIcon className="h-5 w-5 text-zinc-700 dark:text-zinc-400" />
-            Sign out
-          </button>
-        </div>
       </main>
     </>
   );
