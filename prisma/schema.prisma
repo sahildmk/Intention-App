@@ -21,29 +21,16 @@ model Example {
   updatedAt DateTime @updatedAt
 }
 
-model Collection {
-  id              String           @id @default(cuid())
-  userId          String?
-  createdDateTime DateTime         @db.Timestamp()
-  user            User?            @relation(fields: [userId], references: [id])
-  collectionItems CollectionItem[]
-
-  @@index([userId])
-}
-
 model CollectionItem {
   id              String     @id @default(cuid())
-  collectionId    String
-  userId          String?
+  userId          String
   content         String     @db.Text()
   StartDateTime   DateTime   @db.Timestamp()
   EndDateTime     DateTime   @db.Timestamp()
   CreatedDateTime DateTime   @db.Timestamp()
-  user            User?      @relation(fields: [userId], references: [id])
-  collection      Collection @relation(fields: [collectionId], references: [id])
+  user            User      @relation(fields: [userId], references: [id])
 
   @@index([userId])
-  @@index([collectionId])
 }
 
 // Necessary for Next auth
@@ -84,7 +71,6 @@ model User {
   image           String?
   accounts        Account[]
   sessions        Session[]
-  collections     Collection[]
   collectionItems CollectionItem[]
 }
 

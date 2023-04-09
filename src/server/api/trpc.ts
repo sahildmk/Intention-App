@@ -58,6 +58,12 @@ export const createTRPCContext = async (opts: CreateNextContextOptions) => {
   });
 };
 
+export type Context = Awaited<ReturnType<typeof createTRPCContext>>;
+
+export type AuthedContext = {
+  [P in keyof Context]: NonNullable<Context[P]>;
+};
+
 /**
  * 2. INITIALIZATION
  *
