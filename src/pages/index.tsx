@@ -88,15 +88,32 @@ const Home: NextPage<{ collectionItems: CollectionItemDto[] }> = ({
     setIntention(e.target.value);
   };
 
+  const createIntentionMut = api.collections.createCollectionItem.useMutation();
   const updateIntentionMut = api.collections.updateCollectionItem.useMutation();
 
   const updateIntentionCallback = useCallback(() => {
-    if (firstItem?.id && intentionUpdated)
+    if (!intentionUpdated) return;
+
+    if (firstItem?.id) {
       updateIntentionMut.mutate({
         collectionItemId: firstItem?.id,
         content: intention,
       });
-  }, [firstItem?.id, intention, updateIntentionMut, intentionUpdated]);
+    } else if (intention !== "") {
+      createIntentionMut.mutate({
+        content: intention,
+        startDateTime: currentIntentionStartTime.toISOString(),
+        endDateTime: currentIntentionStartTime.toISOString(),
+      });
+    }
+  }, [
+    firstItem?.id,
+    intentionUpdated,
+    updateIntentionMut,
+    intention,
+    createIntentionMut,
+    currentIntentionStartTime,
+  ]);
 
   useEffect(() => {
     const timeout = setTimeout(updateIntentionCallback, 2000);
@@ -179,27 +196,3 @@ const Home: NextPage<{ collectionItems: CollectionItemDto[] }> = ({
 };
 
 export default Home;
-
-const AuthShowcase: React.FC = () => {
-  const { data: sessionData } = useSession();
-
-  const { data: secretMessage } = api.example.getSecretMessage.useQuery(
-    undefined, // no input
-    { enabled: sessionData?.user !== undefined }
-  );
-
-  return (
-    <div className="flex flex-col items-center justify-center gap-4">
-      <p className="text-center text-2xl text-white">
-        {sessionData && <span>Logged in as {sessionData.user?.name}</span>}
-        {secretMessage && <span> - {secretMessage}</span>}
-      </p>
-      <button
-        className="rounded-full bg-white/10 px-10 py-3 font-semibold text-white no-underline transition hover:bg-white/20"
-        onClick={sessionData ? () => void signOut() : () => void signIn()}
-      >
-        {sessionData ? "Sign out" : "Sign in"}
-      </button>
-    </div>
-  );
-};

@@ -2,11 +2,11 @@ import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import * as CollectionsRepository from "@/server/repository/collectionsRepository";
 import { ProcessRequestAsync } from "@/utils/processRequest";
 import { type CollectionItem } from "@prisma/client";
+import moment from "moment";
 import { z } from "zod";
 
 export type CollectionItemDto = {
   id: string;
-  collectionId: string;
   userId: string | null;
   content: string;
   startDateTime: string;
@@ -43,12 +43,32 @@ export const collectionsRouter = createTRPCRouter({
         return CollectionItemToDto(result);
       });
     }),
+
+  createCollectionItem: protectedProcedure
+    .input(
+      z.object({
+        content: z.string(),
+        startDateTime: z.string().datetime(),
+        endDateTime: z.string().datetime(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      return await ProcessRequestAsync(async () => {
+        const result = await CollectionsRepository.CreateCollectionItem(
+          ctx,
+          input.content,
+          moment(input.startDateTime).toDate(),
+          moment(input.endDateTime).toDate()
+        );
+
+        return result;
+      });
+    }),
 });
 
 function CollectionItemToDto(collectionItem: CollectionItem) {
   return {
     id: collectionItem.id,
-    collectionId: collectionItem.collectionId,
     userId: collectionItem.userId,
     content: collectionItem.content,
     startDateTime: collectionItem.StartDateTime.toISOString(),
