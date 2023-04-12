@@ -1,6 +1,6 @@
 import { type NextPage } from "next";
 import Head from "next/head";
-import { getSession, signIn, signOut, useSession } from "next-auth/react";
+import { getSession, signOut, useSession } from "next-auth/react";
 import { api } from "@/utils/api";
 import { type ChangeEvent, useState, useEffect, useCallback } from "react";
 import dynamic from "next/dynamic";
@@ -14,7 +14,9 @@ import { prisma } from "@/server/db";
 import { useRouter } from "next/router";
 import { TRPCError } from "@trpc/server";
 import { ArrowLeftOnRectangleIcon } from "@heroicons/react/24/solid";
+import { InformationCircleIcon } from "@heroicons/react/24/outline";
 import LoadingSpinner from "@/components/loadingSpinner";
+import { useToast } from "@/hooks/ui/use-toast";
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const caller = appRouter.createCaller({
@@ -46,6 +48,7 @@ const Clock = dynamic(() => import("@/components/clock"), {
 const Home: NextPage<{ collectionItems: CollectionItemDto[] }> = ({
   collectionItems,
 }) => {
+  const { toast } = useToast();
   const { data: sessionData, status: sessionStatus } = useSession();
   const router = useRouter();
 
@@ -60,9 +63,8 @@ const Home: NextPage<{ collectionItems: CollectionItemDto[] }> = ({
     }
   }, [calledPush, router, sessionData, sessionStatus]);
 
-  const firstItem = collectionItems.at(0);
-
-  const [intention, setIntention] = useState(firstItem?.content ?? "");
+  const [firstItention, setFirstIntention] = useState(collectionItems.at(0));
+  const [intention, setIntention] = useState(firstItention?.content ?? "");
   const [intentionUpdated, setIntentionUpdated] = useState(false);
 
   const currentMoment = moment();
@@ -73,46 +75,78 @@ const Home: NextPage<{ collectionItems: CollectionItemDto[] }> = ({
   ).padStart(2, "0")}:00:00`;
 
   const [currentIntentionStartTime, setCurrentIntentionStartTime] = useState(
-    moment(firstItem?.startDateTime ?? startOfCurrentTimeBlockString)
+    moment(firstItention?.startDateTime ?? startOfCurrentTimeBlockString)
   );
 
-  const [currentIntentionEndTime, setCurrentIntentionEndTime] = useState(
-    moment(firstItem?.endDateTime ?? startOfCurrentTimeBlockString).add(
-      1,
-      "hour"
-    )
-  );
+  const endTime = firstItention?.endDateTime
+    ? moment(firstItention?.endDateTime)
+    : moment(startOfCurrentTimeBlockString).add(1, "hour");
+
+  const [currentIntentionEndTime, setCurrentIntentionEndTime] =
+    useState(endTime);
 
   const setIntentionCallback = (e: ChangeEvent<HTMLTextAreaElement>) => {
     setIntentionUpdated(true);
     setIntention(e.target.value);
   };
 
-  const createIntentionMut = api.collections.createCollectionItem.useMutation();
+  const timeToLocalISOString = (time: string) => {
+    return `${currentDate}T${time}:00`;
+  };
+
+  const setStartTimeCallback = (e: ChangeEvent<HTMLInputElement>) => {
+    setIntentionUpdated(true);
+    setCurrentIntentionStartTime(moment(timeToLocalISOString(e.target.value)));
+    // console.log(moment(timeToLocalISOString(e.target.value)).toISOString());
+  };
+
+  const setEndTimeCallback = (e: ChangeEvent<HTMLInputElement>) => {
+    setIntentionUpdated(true);
+    setCurrentIntentionEndTime(moment(timeToLocalISOString(e.target.value)));
+  };
+
+  const createIntentionMut = api.collections.createCollectionItem.useMutation({
+    onSuccess(data) {
+      if (data.ok) setFirstIntention(data.value);
+    },
+  });
   const updateIntentionMut = api.collections.updateCollectionItem.useMutation();
 
   const updateIntentionCallback = useCallback(() => {
     if (!intentionUpdated) return;
 
-    if (firstItem?.id) {
+    if (firstItention?.id) {
+      console.log("➡️ Updating intention...");
       updateIntentionMut.mutate({
-        collectionItemId: firstItem?.id,
+        collectionItemId: firstItention?.id,
         content: intention,
+        startDateTime: currentIntentionStartTime.toISOString(),
+        endDateTime: currentIntentionEndTime.toISOString(),
+      });
+      toast({
+        description: "Intention Updated",
       });
     } else if (intention !== "") {
+      console.log("🎆 Creating intention...");
+
       createIntentionMut.mutate({
         content: intention,
         startDateTime: currentIntentionStartTime.toISOString(),
-        endDateTime: currentIntentionStartTime.toISOString(),
+        endDateTime: currentIntentionEndTime.toISOString(),
+      });
+      toast({
+        description: "Intention Saved",
       });
     }
   }, [
-    firstItem?.id,
+    toast,
     intentionUpdated,
-    updateIntentionMut,
+    firstItention?.id,
     intention,
-    createIntentionMut,
+    updateIntentionMut,
     currentIntentionStartTime,
+    currentIntentionEndTime,
+    createIntentionMut,
   ]);
 
   useEffect(() => {
@@ -123,7 +157,7 @@ const Home: NextPage<{ collectionItems: CollectionItemDto[] }> = ({
       setIntentionUpdated(false);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [intention]);
+  }, [intention, currentIntentionStartTime, currentIntentionEndTime]);
 
   return (
     <>
@@ -158,19 +192,28 @@ const Home: NextPage<{ collectionItems: CollectionItemDto[] }> = ({
                   />
                 </div>
               </div>
-              <div className="text-md mt-2 flex gap-1 font-extralight text-zinc-700 dark:text-zinc-300 md:text-xl">
-                <div className="rounded-md px-2 py-1 transition-all hover:cursor-pointer hover:bg-zinc-300 dark:hover:bg-zinc-800">
-                  {currentIntentionStartTime.format("h:mm a")}
-                </div>
+              <div className="time-picker text-md mt-2 flex gap-1 font-extralight text-zinc-700 dark:text-zinc-300 md:text-xl">
+                <input
+                  className="rounded-md bg-transparent px-2 py-1 transition-all hover:cursor-pointer hover:bg-zinc-300 dark:hover:bg-zinc-800"
+                  type="time"
+                  value={currentIntentionStartTime.format("HH:mm")}
+                  onChange={setStartTimeCallback}
+                />
+
                 <div className="py-1">-</div>
-                <div className="rounded-md px-2 py-1 transition-all hover:cursor-pointer hover:bg-zinc-300 dark:hover:bg-zinc-800">
-                  {currentIntentionEndTime.format("h:mm a")}
-                </div>
+
+                <input
+                  className="rounded-md bg-transparent px-2 py-1 transition-all hover:cursor-pointer hover:bg-zinc-300 dark:hover:bg-zinc-800"
+                  type="time"
+                  value={currentIntentionEndTime.format("HH:mm")}
+                  min={currentIntentionEndTime.format("HH:mm")}
+                  onChange={setEndTimeCallback}
+                />
               </div>
             </section>
             <div className="absolute top-0 right-0 mt-10 mr-10 text-sm">
               <button
-                className="flex items-center justify-center gap-1 rounded-md border p-2 text-zinc-700 transition-all hover:bg-zinc-700 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400"
+                className="flex items-center justify-center gap-1 rounded-md border p-2 text-zinc-700 transition-all hover:bg-zinc-300 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-700"
                 onClick={() => {
                   setLoadingLogout(true);
                   void signOut();

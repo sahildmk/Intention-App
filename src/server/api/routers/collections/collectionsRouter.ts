@@ -18,7 +18,9 @@ export const collectionsRouter = createTRPCRouter({
   getCollectionItems: protectedProcedure.query(async ({ ctx }) => {
     return await ProcessRequestAsync(async () => {
       const collectionItems =
-        await CollectionsRepository.GetAllCollectionItemsByUserId(ctx);
+        await CollectionsRepository.GetCurrentAndFutureCollectionItemsByUserId(
+          ctx
+        );
 
       const result: CollectionItemDto[] = [];
 
@@ -31,13 +33,22 @@ export const collectionsRouter = createTRPCRouter({
   }),
 
   updateCollectionItem: protectedProcedure
-    .input(z.object({ collectionItemId: z.string(), content: z.string() }))
+    .input(
+      z.object({
+        collectionItemId: z.string(),
+        content: z.string(),
+        startDateTime: z.string().datetime(),
+        endDateTime: z.string().datetime(),
+      })
+    )
     .mutation(async ({ ctx, input }) => {
       return await ProcessRequestAsync(async () => {
         const result = await CollectionsRepository.UpdateCollectionItemContent(
           ctx,
           input.collectionItemId,
-          input.content
+          input.content,
+          moment(input.startDateTime).toDate(),
+          moment(input.endDateTime).toDate()
         );
 
         return CollectionItemToDto(result);
@@ -61,7 +72,7 @@ export const collectionsRouter = createTRPCRouter({
           moment(input.endDateTime).toDate()
         );
 
-        return result;
+        return CollectionItemToDto(result);
       });
     }),
 });

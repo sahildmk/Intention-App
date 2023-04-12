@@ -12,14 +12,34 @@ export const GetAllCollectionItemsByUserId = async (ctx: AuthedContext) => {
   });
 };
 
+export const GetCurrentAndFutureCollectionItemsByUserId = async (
+  ctx: AuthedContext
+) => {
+  return await ctx.prisma.collectionItem.findMany({
+    where: {
+      userId: ctx.session?.user?.id,
+      EndDateTime: {
+        gte: moment().toISOString(),
+      },
+    },
+    orderBy: {
+      StartDateTime: "asc",
+    },
+  });
+};
+
 export const UpdateCollectionItemContent = async (
   ctx: AuthedContext,
   collectionItemId: string,
-  content: string
+  content: string,
+  startDateTime: Date,
+  endDateTime: Date
 ) => {
   return await ctx.prisma.collectionItem.update({
     data: {
       content: content,
+      StartDateTime: startDateTime,
+      EndDateTime: endDateTime,
     },
     where: {
       id: collectionItemId,

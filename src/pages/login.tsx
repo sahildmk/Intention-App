@@ -25,7 +25,7 @@ const Login: NextPage = () => {
           <section className="flex flex-col items-center justify-center gap-8">
             <h1 className="text-5xl">Intention App</h1>
             <button
-              className="flex items-center justify-center gap-1 rounded-md border border-zinc-700 bg-zinc-900 py-2 px-3 text-zinc-700 transition-all hover:bg-zinc-700 dark:text-zinc-400"
+              className="flex items-center justify-center gap-1 rounded-md border p-2 text-zinc-700 transition-all hover:bg-zinc-300 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-700"
               onClick={() => {
                 setLoading(true);
                 void signIn();
