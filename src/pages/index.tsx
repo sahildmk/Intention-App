@@ -213,7 +213,7 @@ const Home: NextPage<{ collectionItems: CollectionItemDto[] }> = ({
             </section>
             <div className="absolute top-0 right-0 mt-10 mr-10 text-sm">
               <button
-                className="flex items-center justify-center gap-1 rounded-md border p-2 text-zinc-700 transition-all hover:bg-zinc-700 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400"
+                className="flex items-center justify-center gap-1 rounded-md border p-2 text-zinc-700 transition-all hover:bg-zinc-300 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-700"
                 onClick={() => {
                   setLoadingLogout(true);
                   void signOut();
