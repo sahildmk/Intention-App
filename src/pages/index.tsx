@@ -16,6 +16,7 @@ import { TRPCError } from "@trpc/server";
 import { ArrowLeftOnRectangleIcon } from "@heroicons/react/24/solid";
 import { InformationCircleIcon } from "@heroicons/react/24/outline";
 import LoadingSpinner from "@/components/loadingSpinner";
+import { useToast } from "@/hooks/ui/use-toast";
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const caller = appRouter.createCaller({
@@ -47,6 +48,7 @@ const Clock = dynamic(() => import("@/components/clock"), {
 const Home: NextPage<{ collectionItems: CollectionItemDto[] }> = ({
   collectionItems,
 }) => {
+  const { toast } = useToast();
   const { data: sessionData, status: sessionStatus } = useSession();
   const router = useRouter();
 
@@ -121,9 +123,9 @@ const Home: NextPage<{ collectionItems: CollectionItemDto[] }> = ({
         startDateTime: currentIntentionStartTime.toISOString(),
         endDateTime: currentIntentionEndTime.toISOString(),
       });
-
-      setToolTipMsg("Intention updated");
-      setDisplayToolTip(true);
+      toast({
+        description: "Intention Updated",
+      });
     } else if (intention !== "") {
       console.log("🎆 Creating intention...");
 
@@ -132,22 +134,19 @@ const Home: NextPage<{ collectionItems: CollectionItemDto[] }> = ({
         startDateTime: currentIntentionStartTime.toISOString(),
         endDateTime: currentIntentionEndTime.toISOString(),
       });
-
-      setToolTipMsg("Intention created");
-      setDisplayToolTip(true);
+      toast({
+        description: "Intention Saved",
+      });
     }
-
-    setTimeout(() => {
-      setDisplayToolTip(false);
-    }, 4000);
   }, [
+    toast,
     intentionUpdated,
     firstItention?.id,
     intention,
     updateIntentionMut,
-    createIntentionMut,
     currentIntentionStartTime,
     currentIntentionEndTime,
+    createIntentionMut,
   ]);
 
   useEffect(() => {
@@ -159,9 +158,6 @@ const Home: NextPage<{ collectionItems: CollectionItemDto[] }> = ({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [intention, currentIntentionStartTime, currentIntentionEndTime]);
-
-  const [toolTipMsg, setToolTipMsg] = useState("");
-  const [displayToolTip, setDisplayToolTip] = useState(false);
 
   return (
     <>
@@ -200,7 +196,7 @@ const Home: NextPage<{ collectionItems: CollectionItemDto[] }> = ({
                 <input
                   className="rounded-md bg-transparent px-2 py-1 transition-all hover:cursor-pointer hover:bg-zinc-300 dark:hover:bg-zinc-800"
                   type="time"
-                  value={currentIntentionStartTime.format("H:mm")}
+                  value={currentIntentionStartTime.format("HH:mm")}
                   onChange={setStartTimeCallback}
                 />
 
@@ -209,8 +205,8 @@ const Home: NextPage<{ collectionItems: CollectionItemDto[] }> = ({
                 <input
                   className="rounded-md bg-transparent px-2 py-1 transition-all hover:cursor-pointer hover:bg-zinc-300 dark:hover:bg-zinc-800"
                   type="time"
-                  value={currentIntentionEndTime.format("H:mm")}
-                  min={currentIntentionEndTime.format("H:mm")}
+                  value={currentIntentionEndTime.format("HH:mm")}
+                  min={currentIntentionEndTime.format("HH:mm")}
                   onChange={setEndTimeCallback}
                 />
               </div>
@@ -232,13 +228,6 @@ const Home: NextPage<{ collectionItems: CollectionItemDto[] }> = ({
                   </>
                 )}
               </button>
-            </div>
-            <div
-              style={{ display: displayToolTip ? "flex" : "none" }}
-              className="absolute bottom-0 left-0 ml-5 mb-5 flex items-center justify-center gap-1 rounded-md border py-2 px-3 text-zinc-700 transition-all dark:border-zinc-800 dark:text-zinc-400 sm:ml-10 sm:mb-10"
-            >
-              <InformationCircleIcon className="h-5 w-5 text-zinc-700 dark:text-zinc-400" />{" "}
-              {toolTipMsg}
             </div>
           </section>
         ) : (
