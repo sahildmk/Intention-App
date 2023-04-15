@@ -4,4 +4,9 @@
 
 input[type="time"]::-webkit-calendar-picker-indicator {
   filter: invert(100%);
+  position: absolute;
+  filter: invert(100%);
+  width: 100%;
+  background: transparent;
+  left: 0;
 }
