@@ -4,35 +4,7 @@ import moment from "moment";
 import { useState, type ChangeEvent, useCallback, useEffect } from "react";
 import Textarea from "../ui/textarea/textarea";
 import TimePicker from "../ui/time-picker/time-picker";
-import { appRouter } from "@/server/api/root";
 import { type CollectionItemDto } from "@/server/api/routers/collections/collectionsRouter";
-import { prisma } from "@/server/db";
-import { TRPCError } from "@trpc/server";
-import { type GetServerSideProps, type NextPage } from "next";
-import { getSession } from "next-auth/react";
-
-// export const getServerSideProps: GetServerSideProps = async (ctx) => {
-//   const caller = appRouter.createCaller({
-//     session: await getSession(ctx),
-//     prisma: prisma,
-//   });
-
-//   let data: CollectionItemDto[] = [];
-
-//   try {
-//     const result = await caller.collections.getCollectionItems();
-//     if (result.ok) data = result.value;
-//   } catch (error) {
-//     if (error instanceof TRPCError && error.code === "UNAUTHORIZED")
-//       console.log("Unauthorized. Logging out...");
-//   }
-
-//   return {
-//     props: {
-//       collectionItems: data,
-//     },
-//   };
-// };
 
 const IntentionSection: React.FC<{ collectionItems: CollectionItemDto[] }> = ({
   collectionItems,
