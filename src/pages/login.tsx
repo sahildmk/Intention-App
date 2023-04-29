@@ -1,4 +1,5 @@
-import LoadingSpinner from "@/components/loadingSpinner";
+import LoadingSpinner from "@/components/ui/loading-spinner";
+import Button from "@/components/ui/button/button";
 import { type NextPage } from "next";
 import { signIn, useSession } from "next-auth/react";
 import Head from "next/head";
@@ -24,15 +25,14 @@ const Login: NextPage = () => {
         {!sessionData ? (
           <section className="flex flex-col items-center justify-center gap-8">
             <h1 className="text-5xl">Intention App</h1>
-            <button
-              className="flex items-center justify-center gap-1 rounded-md border p-2 text-zinc-700 transition-all hover:bg-zinc-300 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-700"
+            <Button
               onClick={() => {
                 setLoading(true);
                 void signIn();
               }}
             >
               {loading ? <LoadingSpinner /> : "Sign In"}
-            </button>
+            </Button>
           </section>
         ) : (
           <LoadingSpinner />

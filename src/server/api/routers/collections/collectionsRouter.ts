@@ -1,6 +1,6 @@
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import * as CollectionsRepository from "@/server/repository/collectionsRepository";
-import { ProcessRequestAsync } from "@/utils/processRequest";
+import { ProcessRequestAsync } from "@/utils/process-request";
 import { type CollectionItem } from "@prisma/client";
 import moment from "moment";
 import { z } from "zod";
