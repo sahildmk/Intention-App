@@ -13,37 +13,36 @@ import { ArrowLeftOnRectangleIcon } from "@heroicons/react/24/solid";
 import LoadingSpinner from "@/components/ui/loading-spinner";
 import Button from "@/components/ui/button/button";
 import IntentionSection from "@/components/intention-section/intention-section";
+import { api } from "@/utils/api";
 
-export const getServerSideProps: GetServerSideProps = async (ctx) => {
-  const caller = appRouter.createCaller({
-    session: await getSession(ctx),
-    prisma: prisma,
-  });
+// export const getServerSideProps: GetServerSideProps = async (ctx) => {
+//   const caller = appRouter.createCaller({
+//     session: await getSession(ctx),
+//     prisma: prisma,
+//   });
 
-  let data: CollectionItemDto[] = [];
+//   let data: CollectionItemDto[] = [];
 
-  try {
-    const result = await caller.collections.getCollectionItems();
-    if (result.ok) data = result.value;
-  } catch (error) {
-    if (error instanceof TRPCError && error.code === "UNAUTHORIZED")
-      console.log("Unauthorized. Logging out...");
-  }
+//   try {
+//     const result = await caller.collections.getCollectionItems();
+//     if (result.ok) data = result.value;
+//   } catch (error) {
+//     if (error instanceof TRPCError && error.code === "UNAUTHORIZED")
+//       console.log("Unauthorized. Logging out...");
+//   }
 
-  return {
-    props: {
-      collectionItems: data,
-    },
-  };
-};
+//   return {
+//     props: {
+//       collectionItems: data,
+//     },
+//   };
+// };
 
 const Clock = dynamic(() => import("@/components/ui/clock"), {
   ssr: false,
 });
 
-const Home: NextPage<{ collectionItems: CollectionItemDto[] }> = ({
-  collectionItems,
-}) => {
+const Home: NextPage = () => {
   const { data: sessionData, status: sessionStatus } = useSession();
   const router = useRouter();
 
@@ -58,6 +57,10 @@ const Home: NextPage<{ collectionItems: CollectionItemDto[] }> = ({
     }
   }, [calledPush, router, sessionData, sessionStatus]);
 
+  const query = api.collections.getCollectionItems.useQuery(undefined, {
+    enabled: sessionData?.user !== undefined,
+  });
+
   return (
     <>
       <Head>
@@ -69,7 +72,12 @@ const Home: NextPage<{ collectionItems: CollectionItemDto[] }> = ({
         {sessionData ? (
           <section className="flex w-full justify-center">
             <Clock />
-            <IntentionSection collectionItems={collectionItems} />
+            {query.isSuccess && query.data.ok ? (
+              <IntentionSection collectionItems={query.data.value} />
+            ) : (
+              <LoadingSpinner />
+            )}
+
             <div className="absolute top-0 right-0 mt-10 mr-10 text-sm">
               <Button
                 onClick={() => {
